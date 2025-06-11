@@ -1,0 +1,6 @@
+{
+  "id": "hkbus",
+  "name": "HK-Bus",
+  "version": "1.0.0",
+  "description": "A plugin that supports most of the public transport in Hong Kong, powered by the HK-Bus API."
+}
