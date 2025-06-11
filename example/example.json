@@ -5,6 +5,6 @@
   "author": "ME",
   "description": "An example plugin.",
   "repositoryUrl": "https://example.com",
-  "getEtaScript": "async function t(o,e){console.log(\"getEta function called\")}var a=t;export{a as default};\n",
-  "updateRoutesScript": "async function e(){console.log(\"updateRoutes function called\")}var o=e;export{o as default};\n"
+  "updateRoutesScript": "async function e(){console.log(\"updateRoutes function called\")}var o=e;export{o as default};\n",
+  "getEtaScript": "async function t(o,e){console.log(\"getEta function called\")}var a=t;export{a as default};\n"
 }
