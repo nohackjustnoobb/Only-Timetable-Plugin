@@ -1,0 +1,41 @@
+name: Build and Push
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          path: main
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Build Project
+        working-directory: ./main
+        run: deno run build
+
+      - name: Checkout Static Repository
+        uses: actions/checkout@v4
+        with:
+          ref: static
+          path: static
+
+      - name: Copy the Git folder
+        run: |
+          cp -r ./static/.git ./main/dist/
+
+      - name: Add and commit
+        uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
+          cwd: ./main/dist/
