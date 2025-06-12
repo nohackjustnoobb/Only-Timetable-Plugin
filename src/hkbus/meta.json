@@ -2,5 +2,7 @@
   "id": "hkbus",
   "name": "HK-Bus",
   "version": "1.0.0",
-  "description": "A plugin that supports most of the public transport in Hong Kong, powered by the HK-Bus API."
+  "description": "A plugin that supports most of the public transport in Hong Kong, powered by the HKBUS.APP API.",
+  "repositoryUrl": "https://github.com/nohackjustnoobb/Only-Timetable-Plugin",
+  "updatesUrl": "https://raw.githubusercontent.com/nohackjustnoobb/Only-Timetable-Plugin/refs/heads/static/hkbus/hkbus.json"
 }

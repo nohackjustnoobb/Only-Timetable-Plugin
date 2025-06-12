@@ -20,3 +20,13 @@ You can access the plugin JSON directly at:
 ```
 https://raw.githubusercontent.com/nohackjustnoobb/Only-Timetable-Plugin/refs/heads/static/hkbus/hkbus.json
 ```
+
+### AIU
+
+国際教養大学線の時刻表を提供するプラグインです。このデータは 2025-2026 年度専用です。
+
+#### プラグインリンク
+
+```
+https://raw.githubusercontent.com/nohackjustnoobb/Only-Timetable-Plugin/refs/heads/static/aiu/aiu.json
+```

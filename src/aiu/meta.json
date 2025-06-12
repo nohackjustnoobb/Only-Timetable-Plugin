@@ -1,0 +1,8 @@
+{
+  "id": "aiu",
+  "name": "AIU",
+  "version": "1.0.0",
+  "description": "国際教養大学線の時刻表を提供するプラグインです。",
+  "repositoryUrl": "https://github.com/nohackjustnoobb/Only-Timetable-Plugin",
+  "updatesUrl": "https://raw.githubusercontent.com/nohackjustnoobb/Only-Timetable-Plugin/refs/heads/static/aiu/aiu.json"
+}
