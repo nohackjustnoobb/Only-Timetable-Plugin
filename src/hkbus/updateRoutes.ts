@@ -1,8 +1,41 @@
-import { fetchEtaDb } from "hk-bus-eta";
+import { Company, fetchEtaDb } from "hk-bus-eta";
 import { Route, Stop } from "../utils/model.ts";
 import { getValue, saveRoutes, saveStops, setValue } from "../utils/isar.ts";
 
 const UPDATE_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
+
+const TRANSLATIONS: { [lanuageCode: string]: { [co: string]: string } } = {
+  en: {
+    kmb: "KMB",
+    ctb: "CTB",
+    nlb: "NLB",
+    lrtfeeder: "MTR",
+    gmb: "GMB",
+    sunferry: "Sun",
+    hkkf: "HKKF",
+    fortuneferry: "Fortune",
+  },
+  zh: {
+    kmb: "九巴",
+    ctb: "城巴",
+    nlb: "嶼巴",
+    gmb: "專線小巴",
+    lrtfeeder: "港鐵",
+    sunferry: "新渡輪",
+    hkkf: "港九小輪",
+    fortuneferry: "富裕小輪",
+  },
+  zh_CN: {
+    kmb: "九巴",
+    ctb: "城巴",
+    nlb: "屿巴",
+    gmb: "专线小巴",
+    lrtfeeder: "港铁",
+    sunferry: "新渡轮",
+    hkkf: "港九小轮",
+    fortuneferry: "富裕小轮",
+  },
+};
 
 async function updateRoutes() {
   // Check if the last update was within the update interval
@@ -15,7 +48,10 @@ async function updateRoutes() {
   for (const [stopId, stopListEntry] of Object.entries(db.stopList)) {
     const stop: Stop = {
       id: stopId,
-      name: stopListEntry.name,
+      name: {
+        ...stopListEntry.name,
+        zh_CN: stopListEntry.name.zh,
+      },
       lat: stopListEntry.location.lat,
       long: stopListEntry.location.lng,
       meta: db.stopMap[stopId],
@@ -35,72 +71,51 @@ async function updateRoutes() {
       reversedStopMap[company][companyStopId] = stopId;
     }
   }
-  const convertToStopId = (company: string, ids: string[]) => [
-    company,
+
+  const convertToStopId = (company: string, ids: string[]) =>
     ids.map((id) => {
       if (reversedStopMap[company][id]) return reversedStopMap[company][id];
       if (db.stopList[id]) return id;
 
       throw new Error(`Invalid stop ID: ${id} for company: ${company}`);
-    }),
-  ];
+    });
 
   const routes: Route[] = [];
 
   for (const [routeId, routeListEntry] of Object.entries(db.routeList)) {
-    const convertedStops = Object.entries(routeListEntry.stops).map(
-      ([company, ids]) => convertToStopId(company, ids)
+    const company = Object.keys(routeListEntry.stops)[0] as Company;
+    const convertedStops = convertToStopId(
+      company,
+      routeListEntry.stops[company]
     );
 
-    const groupedCompany: { [stops: string]: string[] } = {};
-    for (const [company, ids] of convertedStops) {
-      const bound =
-        routeListEntry.bound[company as keyof typeof routeListEntry.bound];
-      const stopsKey = JSON.stringify({
-        stops: ids,
-        bound: bound,
-      });
-      if (!groupedCompany[stopsKey]) groupedCompany[stopsKey] = [];
+    let displayId = routeListEntry.route;
+    // If the service type is greater than 1, it means it's a special service
+    if (Number(routeListEntry.serviceType) > 1) displayId += " ⃰";
 
-      groupedCompany[stopsKey].push(company as string);
-    }
+    const route: Route = {
+      id: routeId,
+      displayId: displayId,
+      name: [
+        ...Object.values(routeListEntry.orig),
+        ...Object.values(routeListEntry.dest),
+      ].join("+"),
+      source: Object.fromEntries(
+        Object.entries(TRANSLATIONS).map(([lang, translations]) => [
+          lang,
+          routeListEntry.co
+            .map((k) => translations[k])
+            .join("+")
+            .toLocaleUpperCase(),
+        ])
+      ),
+      orig: convertedStops[0],
+      dest: convertedStops[convertedStops.length - 1],
+      stops: convertedStops,
+      meta: routeListEntry,
+    };
 
-    for (const [stopsKey, companies] of Object.entries(groupedCompany)) {
-      const parsed = JSON.parse(stopsKey);
-      const stops = parsed.stops as string[];
-      const bound = parsed.bound as string;
-      const groupRouteListEntry = JSON.parse(JSON.stringify(routeListEntry));
-
-      // Update the routeListEntry with only the companies in this group
-      groupRouteListEntry.co = companies;
-      groupRouteListEntry.bound = Object.fromEntries(
-        companies.map((c) => [c, groupRouteListEntry.bound[c]])
-      );
-      groupRouteListEntry.stops = Object.fromEntries(
-        companies.map((c) => [c, groupRouteListEntry.stops[c]])
-      );
-
-      let displayId = routeListEntry.route;
-      // If the service type is greater than 1, it means it's a special service
-      if (Number(routeListEntry.serviceType) > 1) displayId += " ⃰";
-
-      const route: Route = {
-        id: `${routeId}+${companies.join("+")}+${bound}`,
-        displayId: displayId,
-        name: [
-          ...Object.values(routeListEntry.orig),
-          ...Object.values(routeListEntry.dest),
-        ].join("+"),
-        // TODO add other languages
-        source: { en: companies.join(" / ").toLocaleUpperCase() },
-        orig: stops[0],
-        dest: stops[stops.length - 1],
-        stops: stops,
-        meta: groupRouteListEntry,
-      };
-
-      routes.push(route);
-    }
+    routes.push(route);
   }
 
   await saveRoutes(routes);

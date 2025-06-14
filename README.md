@@ -1,6 +1,6 @@
 # Only Timetable Plugin
 
-This repository contains plugins for [Only-Timetable](https://github.com/nohackjustnoobb/Only-Timetable), developed by ME!
+This repository contains plugins for [Only-Timetable](https://github.com/nohackjustnoobb/Only-Timetable), developed by me! I'm not sure why, but the code here is quite messy and the data structure is poorly designed. However, it works :) Maybe I'll fix it later.
 
 ## Plugins
 
