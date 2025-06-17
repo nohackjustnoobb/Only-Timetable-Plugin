@@ -4,13 +4,21 @@ import { specialRoutes, timetables, semBreaks, holidays } from "./data.ts";
 function getNextThreeTimetableTimes(
   routeId: string,
   type: "regular" | "holiday" | "semBreak",
+  timeTaken: number,
   now: Date
 ): number[] {
   const timetable = timetables[routeId];
   if (!timetable) return [];
-  const times = (timetable[type] || []).filter(
-    (arr: number[]) => arr.length === 2
-  ) as [number, number][];
+  const times = (timetable[type] as [number, number][]).map(([h, m]) => {
+    const mins = m + timeTaken;
+    if (mins >= 60) {
+      const extraHours = Math.floor(mins / 60);
+      const newMinutes = mins % 60;
+      return [h + extraHours, newMinutes] as [number, number];
+    }
+
+    return [h, mins] as [number, number];
+  });
 
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
@@ -51,18 +59,15 @@ async function getEta(route: Route, stop: Stop): Promise<Eta[]> {
       .reduce((a, b) => a + b, 0);
   }
 
-  const addTimeTake = (arrivalTime: number) =>
-    arrivalTime + timeTake * 60 * 1000;
-
   // special route
   if (Object.keys(specialRoutes).includes(route.id)) {
     const onlyOn = specialRoutes[route.id].onlyOn;
 
     if (onlyOn.includes(todayStr)) {
-      return getNextThreeTimetableTimes(route.id, "regular", now).map(
+      return getNextThreeTimetableTimes(route.id, "regular", timeTake, now).map(
         (arrivalTime) => ({
           isRealTime: false,
-          arrivalTime: addTimeTake(arrivalTime),
+          arrivalTime: arrivalTime,
         })
       );
     }
@@ -73,10 +78,10 @@ async function getEta(route: Route, stop: Stop): Promise<Eta[]> {
   // Check if the timetables have other types other than regular
   const timetable = timetables[route.id];
   if (timetable.holiday === undefined && timetable.semBreak === undefined) {
-    return getNextThreeTimetableTimes(route.id, "regular", now).map(
+    return getNextThreeTimetableTimes(route.id, "regular", timeTake, now).map(
       (arrivalTime) => ({
         isRealTime: false,
-        arrivalTime: addTimeTake(arrivalTime),
+        arrivalTime: arrivalTime,
       })
     );
   }
@@ -93,10 +98,10 @@ async function getEta(route: Route, stop: Stop): Promise<Eta[]> {
     return now >= startDate && now <= endDate;
   });
   if (isSemBreak) {
-    return getNextThreeTimetableTimes(route.id, "semBreak", now).map(
+    return getNextThreeTimetableTimes(route.id, "semBreak", timeTake, now).map(
       (arrivalTime) => ({
         isRealTime: false,
-        arrivalTime: addTimeTake(arrivalTime),
+        arrivalTime: arrivalTime,
       })
     );
   }
@@ -105,18 +110,18 @@ async function getEta(route: Route, stop: Stop): Promise<Eta[]> {
   const isWeekend = now.getDay() === 0 || now.getDay() >= 5; // Sunday=0, Saturday=6
   const isHoliday = holidays.includes(todayStr);
   if (isWeekend || isHoliday) {
-    return getNextThreeTimetableTimes(route.id, "holiday", now).map(
+    return getNextThreeTimetableTimes(route.id, "holiday", timeTake, now).map(
       (arrivalTime) => ({
         isRealTime: false,
-        arrivalTime: addTimeTake(arrivalTime),
+        arrivalTime: arrivalTime,
       })
     );
   }
 
-  return getNextThreeTimetableTimes(route.id, "regular", now).map(
+  return getNextThreeTimetableTimes(route.id, "regular", timeTake, now).map(
     (arrivalTime) => ({
       isRealTime: false,
-      arrivalTime: addTimeTake(arrivalTime),
+      arrivalTime: arrivalTime,
     })
   );
 }
