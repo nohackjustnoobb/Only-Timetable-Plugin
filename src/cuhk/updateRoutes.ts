@@ -32,14 +32,14 @@ async function updateRoutes() {
     if (stops.includes(undefined))
       throw new Error(`Invalid stop in route ${id}: ${stops}`);
 
-    if (["2", "N", "H"].includes(id)) {
-      // Special handling for routes 2, N, and H
+    // Special handling for certain routes
+    if (["2", "N", "H", "5*", "6A*", "7*", "8*"].includes(id)) {
       continue;
     }
 
     routes.push({
       id,
-      displayId: id.replaceAll("+", "").replaceAll("*", " ⃰"),
+      displayId: id.replaceAll("+", ""),
       source: {
         en: "CUHK",
         zh: "中大",

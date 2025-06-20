@@ -12,16 +12,27 @@ async function getEta(route: Route, stop: Stop): Promise<Eta[]> {
   // stop to stop
   const s2s: string[] = [];
   for (let i = 0; i < route.stops.length - 1; i++) {
-    const curStop = route.stops[i];
+    const curStop: string = route.stops[i];
     // The first stop
     if (curStop === stop.id) break;
 
-    const nextStop = route.stops[i + 1];
-    s2s.push(
-      `${Station[curStop as keyof typeof Station]}>>${
+    let nextStop: string = route.stops[i + 1];
+    let timeKey = `${Station[curStop as keyof typeof Station]}>>${
+      Station[nextStop as keyof typeof Station]
+    }`;
+    if (!busStationTimings[timeKey]) {
+      i += 1;
+      nextStop = route.stops[i + 1];
+
+      timeKey = `${Station[curStop as keyof typeof Station]}>>${
         Station[nextStop as keyof typeof Station]
-      }`
-    );
+      }`;
+
+      if (!busStationTimings[timeKey]) {
+        continue;
+      }
+    }
+    s2s.push(timeKey);
 
     if (nextStop === stop.id) break;
   }
@@ -37,9 +48,22 @@ async function getEta(route: Route, stop: Stop): Promise<Eta[]> {
   const info = busRouteInfos[route.id as keyof typeof busRouteInfos];
 
   const isSpecialRoute = Object.keys(SpecialRoutes).includes(route.id);
-  if (isSpecialRoute) {
-    info.minuteMarks =
-      SpecialRoutes[route.id as keyof typeof SpecialRoutes].minuteMarks;
+  const specialInstructions = isSpecialRoute
+    ? SpecialRoutes[route.id as keyof typeof SpecialRoutes]
+    : undefined;
+  if (isSpecialRoute && specialInstructions) {
+    if (specialInstructions.minuteMarks)
+      info.minuteMarks = specialInstructions.minuteMarks;
+
+    if (
+      specialInstructions.onDays &&
+      specialInstructions.onDays.includes(now.getDay())
+    ) {
+      info.serviceDays = specialInstructions.onDays;
+
+      if (specialInstructions.lastService)
+        info.lastService = specialInstructions.lastService;
+    }
   }
 
   // Not on service day
@@ -56,7 +80,23 @@ async function getEta(route: Route, stop: Stop): Promise<Eta[]> {
       let skipThisStop = false;
       if (isSpecialRoute) {
         const special = SpecialRoutes[route.id as keyof typeof SpecialRoutes];
-        if (!special.notOn.includes(mark) && special.skip.includes(stop.id)) {
+        if (
+          // Skip if mark not on notOn
+          (special.notOn &&
+            !special.notOn.includes(mark) &&
+            special.skip &&
+            special.skip.includes(stop.id)) ||
+          // Skip is today on onDays
+          (special.onDays &&
+            special.onDays.includes(now.getDay()) &&
+            special.skip &&
+            special.skip.includes(stop.id)) ||
+          // Else skip if not on onDays
+          (special.onDays &&
+            !special.onDays.includes(now.getDay()) &&
+            special.elseSkip &&
+            special.elseSkip.includes(stop.id))
+        ) {
           skipThisStop = true;
         }
       }
