@@ -21,6 +21,25 @@ You can access the plugin JSON directly at:
 https://raw.githubusercontent.com/nohackjustnoobb/Only-Timetable-Plugin/refs/heads/static/hkbus/hkbus.json
 ```
 
+---
+
+### CUHK
+
+This plugin provides school bus timetable and ETA information for CUHK (The Chinese University of Hong Kong). The data is sourced from the CUHK-bus-clock project by [CCheukKa](https://github.com/CCheukKa), and has been modified to fit the plugin.
+
+- **CUHK-bus-clock Repository:** [CUHK-bus-clock](https://github.com/CCheukKa/CUHK-bus-clock)
+- **License:** GPL-3.0
+
+#### Plugin Link
+
+You can access the plugin JSON directly at:
+
+```
+https://raw.githubusercontent.com/nohackjustnoobb/Only-Timetable-Plugin/refs/heads/static/cuhk/cuhk.json
+```
+
+---
+
 ### AIU
 
 国際教養大学線の時刻表を提供するプラグインです。このデータは 2025-2026 年度専用です。

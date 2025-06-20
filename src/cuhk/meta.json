@@ -1,0 +1,8 @@
+{
+  "id": "cuhk",
+  "name": "CUHK",
+  "version": "1.0.0",
+  "description": "A plugin that provides timetable information for the school bus at the Chinese University of Hong Kong (CUHK), data sourced from the CCheukKa/CUHK-bus-clock.",
+  "repositoryUrl": "https://github.com/nohackjustnoobb/Only-Timetable-Plugin",
+  "updatesUrl": "https://raw.githubusercontent.com/nohackjustnoobb/Only-Timetable-Plugin/refs/heads/static/cuhk/cuhk.json"
+}

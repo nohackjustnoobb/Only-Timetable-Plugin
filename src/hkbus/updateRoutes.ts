@@ -25,7 +25,7 @@ const TRANSLATIONS: { [lanuageCode: string]: { [co: string]: string } } = {
     hkkf: "港九小輪",
     fortuneferry: "富裕小輪",
   },
-  zh_CN: {
+  zh_Hans: {
     kmb: "九巴",
     ctb: "城巴",
     nlb: "屿巴",
@@ -50,7 +50,8 @@ async function updateRoutes() {
       id: stopId,
       name: {
         ...stopListEntry.name,
-        zh_CN: stopListEntry.name.zh,
+        // TODO translate to zh_Hans
+        zh_Hans: stopListEntry.name.zh,
       },
       lat: stopListEntry.location.lat,
       long: stopListEntry.location.lng,
